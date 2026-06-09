@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>雙向台灣手語虛擬人系統</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要內容</a>
+
+    <div class="app-shell">
+
+      <!-- ── Header ── -->
+      <header class="site-header">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 28 28" fill="none">
+              <path fill="currentColor" d="M9 18V11.5a1.5 1.5 0 013 0V9.5a1.5 1.5 0 013 0V8a1.5 1.5 0 013 0v8c0 4.4-3.3 7.5-8 7.5-3.4 0-6-2.3-6-6V15a1.5 1.5 0 013 0v3z"/>
+            </svg>
+          </div>
+          <span class="brand-name">雙向台灣手語系統</span>
+        </div>
+
+        <nav class="site-nav" aria-label="主要導覽">
+          <a href="#home" aria-current="page">首頁</a>
+          <a href="#recognition">手語辨識</a>
+          <a href="#generation">手語生成</a>
+          <a href="#favorites">收藏</a>
+          <a href="#history">最近紀錄</a>
+        </nav>
+
+        <div class="toolbar" aria-label="顯示設定">
+          <button type="button" class="toolbar-btn" id="toggleFontSize" aria-pressed="false">大字</button>
+        </div>
+      </header>
+
+      <!-- ── Main ── -->
+      <main id="main-content">
+
+        <!-- Home -->
+        <section class="page-section" id="home" aria-label="首頁">
+          <div class="home-hero">
+            <p class="section-tag">Taiwan Sign Language Avatar</p>
+            <h1>雙向台灣<br>手語虛擬人系統</h1>
+            <p class="home-sub">在同一介面完成手語辨識與手語生成，<br>支援聽障者與聽人雙向溝通。</p>
+            <div class="home-ctas">
+              <a class="btn-primary" href="#recognition">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                手語 → 文字
+              </a>
+              <a class="btn-secondary" href="#generation">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                文字 → 手語
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recognition -->
+        <section class="page-section" id="recognition" hidden aria-labelledby="rec-title">
+          <div class="page-title">
+            <p class="section-tag">手語辨識</p>
+            <h2 id="rec-title">辨識手語語序，轉換台灣口語</h2>
+          </div>
+
+          <div class="workspace-grid">
+            <article class="panel input-panel">
+              <h3 class="panel-title">輸入來源</h3>
+
+              <div class="mode-switch" role="tablist" aria-label="輸入模式">
+                <button type="button" class="chip-btn is-active" id="videoModeButton" data-mode="upload" aria-pressed="true">上傳影片</button>
+                <button type="button" class="chip-btn" id="cameraModeButton" data-mode="camera" aria-pressed="false">即時攝影機</button>
+              </div>
+
+              <!-- Hidden elements for script compatibility -->
+              <video id="previewVideo" hidden playsinline aria-hidden="true"></video>
+              <div id="emptyPreview" hidden aria-hidden="true"></div>
+
+              <div class="field-row">
+                <label for="videoUpload">手語影片</label>
+                <input id="videoUpload" type="file" accept="video/*" />
+              </div>
+
+              <div class="field-row">
+                <label for="recognitionScenario">示範情境</label>
+                <select id="recognitionScenario">
+                  <option value="drink">我要喝水</option>
+                  <option value="register">我要掛號</option>
+                  <option value="help">請幫我一下</option>
+                </select>
+              </div>
+
+              <div class="action-row">
+                <button type="button" class="btn-primary" id="startRecognition">開始辨識</button>
+                <button type="button" class="btn-ghost" id="resetRecognition">重置</button>
+                <button type="button" class="btn-ghost" id="openCamera">開攝影機</button>
+              </div>
+
+              <p class="status-note" id="cameraMessage" role="status" aria-live="polite">
+                系統先顯示手語語序，再整理成口語。
+              </p>
+            </article>
+
+            <article class="panel result-panel">
+              <div class="panel-head">
+                <h3 class="panel-title">辨識結果</h3>
+                <span class="status-dot" id="recognitionStatus" data-state="idle">等待輸入</span>
+              </div>
+
+              <div class="steps-list" aria-label="辨識流程">
+                <div class="step-item" id="recognitionStep1">
+                  <span class="step-dot" aria-hidden="true">1</span>
+                  <strong>影像分析</strong>
+                </div>
+                <div class="step-item" id="recognitionStep2">
+                  <span class="step-dot" aria-hidden="true">2</span>
+                  <strong>手語語序辨識</strong>
+                </div>
+                <div class="step-item" id="recognitionStep3">
+                  <span class="step-dot" aria-hidden="true">3</span>
+                  <strong>口語轉換</strong>
+                </div>
+              </div>
+
+              <div class="result-block">
+                <span class="result-tag">手語語序</span>
+                <div class="token-row" id="recognitionTokens" aria-live="polite"></div>
+              </div>
+
+              <div class="result-block">
+                <span class="result-tag">台灣口語</span>
+                <p id="spokenResult" class="spoken-text">尚未辨識</p>
+              </div>
+
+            </article>
+          </div>
+        </section>
+
+        <!-- Generation -->
+        <section class="page-section" id="generation" hidden aria-labelledby="gen-title">
+          <div class="page-title">
+            <p class="section-tag">手語生成</p>
+            <h2 id="gen-title">輸入口語，轉換手語語序並播放</h2>
+          </div>
+
+          <div class="workspace-grid">
+            <article class="panel input-panel">
+              <h3 class="panel-title">輸入句子</h3>
+
+              <div class="field-row">
+                <label for="textInput">台灣口語句子</label>
+                <textarea id="textInput" rows="3" placeholder="例如：我要喝水">我要喝水</textarea>
+              </div>
+
+              <div class="field-row">
+                <label for="catSelect">情境分類</label>
+                <select id="catSelect">
+                  <option value="greeting">問候</option>
+                  <option value="medical">醫療</option>
+                  <option value="school">校園</option>
+                  <option value="transport">交通</option>
+                </select>
+              </div>
+              <div class="chips-row" id="catChips" aria-label="情境詞彙快捷"></div>
+
+              <div class="action-row">
+                <button type="button" class="btn-primary" id="generateSign">轉成手語</button>
+                <button type="button" class="btn-secondary" id="playAvatar">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  播放
+                </button>
+                <button type="button" class="btn-ghost" id="clearText">清除</button>
+              </div>
+
+              <p class="status-note" id="generationStatus" role="status" aria-live="polite">
+                輸入口語後，系統先轉換手語語序。
+              </p>
+            </article>
+
+            <article class="panel result-panel">
+              <h3 class="panel-title">轉換結果</h3>
+
+              <div class="result-block">
+                <span class="result-tag">原始句子</span>
+                <p id="originalSentence" class="spoken-text">我要喝水</p>
+              </div>
+
+              <div class="result-block">
+                <div class="result-block-header">
+                  <span class="result-tag">台灣手語語序</span>
+                  <button type="button" class="fav-btn" id="favBtn" aria-label="收藏此句子">☆ 收藏</button>
+                </div>
+                <div class="token-row" id="generationTokens"></div>
+              </div>
+
+              <div class="avatar-wrap" aria-label="虛擬人播放區">
+                <div class="avatar-stage">
+                  <div class="avatar-figure" id="avatarFigure">
+                    <div class="avatar-head">
+                      <div class="avatar-eye avatar-eye-l" aria-hidden="true"></div>
+                      <div class="avatar-eye avatar-eye-r" aria-hidden="true"></div>
+                    </div>
+                    <div class="avatar-body" aria-hidden="true"></div>
+                    <div class="avatar-arm avatar-arm-l" aria-hidden="true"></div>
+                    <div class="avatar-arm avatar-arm-r" aria-hidden="true"></div>
+                  </div>
+                </div>
+                <div class="speed-row" aria-label="播放速度">
+                  <span class="speed-label">速度</span>
+                  <button type="button" class="speed-btn" data-speed="1400">慢</button>
+                  <button type="button" class="speed-btn is-active" data-speed="850">普通</button>
+                  <button type="button" class="speed-btn" data-speed="450">快</button>
+                </div>
+                <div class="meta-row">
+                  <div class="meta-item">
+                    <span class="result-tag">播放狀態</span>
+                    <strong id="avatarStatus">尚未播放</strong>
+                  </div>
+                  <div class="meta-divider" aria-hidden="true"></div>
+                  <div class="meta-item">
+                    <span class="result-tag">目前詞卡</span>
+                    <strong id="activeToken">--</strong>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- Favorites -->
+        <section class="page-section" id="favorites" hidden aria-labelledby="fav-title">
+          <div class="page-title">
+            <p class="section-tag">收藏</p>
+            <h2 id="fav-title">收藏的句子</h2>
+          </div>
+
+          <div class="history-grid">
+            <article class="panel">
+              <h3 class="panel-title"><span aria-hidden="true">★ </span>收藏句子</h3>
+              <ul class="plain-list fav-list" id="favoritesList">
+                <li class="empty-item">尚無收藏</li>
+              </ul>
+            </article>
+
+            <article class="panel result-panel">
+              <div class="panel-head">
+                <h3 class="panel-title">手語播放</h3>
+                <span class="status-dot" id="favAvatarStatus" data-state="idle">等待選擇</span>
+              </div>
+
+              <div class="result-block">
+                <span class="result-tag">選取句子</span>
+                <p id="favSelectedSentence" class="spoken-text">—</p>
+              </div>
+
+              <div class="result-block">
+                <span class="result-tag">台灣手語語序</span>
+                <div class="token-row" id="favTokens"></div>
+              </div>
+
+              <div class="avatar-wrap">
+                <div class="avatar-stage">
+                  <div class="avatar-figure" id="favAvatarFigure">
+                    <div class="avatar-head">
+                      <div class="avatar-eye avatar-eye-l" aria-hidden="true"></div>
+                      <div class="avatar-eye avatar-eye-r" aria-hidden="true"></div>
+                    </div>
+                    <div class="avatar-body" aria-hidden="true"></div>
+                    <div class="avatar-arm avatar-arm-l" aria-hidden="true"></div>
+                    <div class="avatar-arm avatar-arm-r" aria-hidden="true"></div>
+                  </div>
+                </div>
+                <div class="speed-row" aria-label="播放速度">
+                  <span class="speed-label">速度</span>
+                  <button type="button" class="speed-btn fav-speed-btn" data-speed="1400">慢</button>
+                  <button type="button" class="speed-btn fav-speed-btn is-active" data-speed="850">普通</button>
+                  <button type="button" class="speed-btn fav-speed-btn" data-speed="450">快</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- History -->
+        <section class="page-section" id="history" hidden aria-labelledby="hist-title">
+          <div class="page-title">
+            <p class="section-tag">最近紀錄</p>
+            <h2 id="hist-title">最近辨識與生成結果</h2>
+          </div>
+
+          <div class="history-grid">
+            <article class="panel">
+              <h3 class="panel-title"><span aria-hidden="true">📝 </span>最近辨識結果</h3>
+              <ul class="plain-list" id="recognitionHistory">
+                <li class="empty-item">尚無辨識紀錄</li>
+              </ul>
+            </article>
+
+            <article class="panel">
+              <h3 class="panel-title"><span aria-hidden="true">🎬 </span>最近生成結果</h3>
+              <ul class="plain-list" id="generationHistory">
+                <li class="empty-item">尚無生成紀錄</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
